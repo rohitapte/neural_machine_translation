@@ -4,7 +4,7 @@ import os
 from utils.data_utils import build_tokenizer_and_split_text
 from tensorflow.python.keras.utils import to_categorical
 from utils.data_generator import DataGenerator
-from models.model_vanilla_encoder import define_nmt
+from models.encoder_decoder_lstm import define_nmt
 
 if __name__ == '__main__':
     #Define model parameters
