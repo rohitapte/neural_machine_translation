@@ -51,9 +51,9 @@ def tokenize_sentences_and_split(source_timesteps,target_timesteps):
 
 def build_tokenizer_and_split_text():
     source_lang_text_data,target_lang_text_data=get_data()
-    source_tokenizer=keras.preprocessing.text.Tokenizer(oov_token='<UNK>')
+    source_tokenizer=keras.preprocessing.text.Tokenizer(num_words=29014,oov_token='<UNK>')
     source_tokenizer.fit_on_texts(source_lang_text_data)
-    target_tokenizer=keras.preprocessing.text.Tokenizer(oov_token='<UNK>')
+    target_tokenizer=keras.preprocessing.text.Tokenizer(num_words=39371,oov_token='<UNK>')
     target_tokenizer.fit_on_texts(target_lang_text_data)
     src_train, src_test, tgt_train, tgt_test = train_test_split(source_lang_text_data, target_lang_text_data, test_size=0.1)
     return src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer

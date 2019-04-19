@@ -32,8 +32,14 @@ if __name__ == '__main__':
         model.save('h5.models/model.h5')
 
     src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text()
-    src_vsize=max(source_tokenizer.index_word.keys())+1
-    tgt_vsize=max(target_tokenizer.index_word.keys())+1
+    if source_tokenizer.num_words is None:
+        src_vsize=max(source_tokenizer.index_word.keys())+1
+    else:
+        src_vsize=source_tokenizer.num_words
+    if target_tokenizer.num_words is None:
+        tgt_vsize=max(target_tokenizer.index_word.keys())+1
+    else:
+        tgt_vsize=target_tokenizer.num_words
     print('Source Vocab {}'.format(src_vsize))
     print('Target Vocab {}'.format(tgt_vsize))
     training_generator=DataGenerator(source_text=src_train,target_text=tgt_train,source_tokenizer=source_tokenizer,target_tokenizer=target_tokenizer,
