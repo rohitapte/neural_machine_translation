@@ -11,10 +11,10 @@ if __name__ == '__main__':
     WHICH_GPU="1"
 
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=100,100
-    HIDDEN_SIZE=256
-    EMBEDDING_DIM=300
+    HIDDEN_SIZE=128
+    EMBEDDING_DIM=100
     NUM_EPOCHS=10
-    BATCH_SIZE=128
+    BATCH_SIZE=32
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID";
     # The GPU id to use, usually either "0" or "1";
@@ -34,6 +34,8 @@ if __name__ == '__main__':
     src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text()
     src_vsize=max(source_tokenizer.index_word.keys())+1
     tgt_vsize=max(target_tokenizer.index_word.keys())+1
+    print('Source Vocab {}'.format(src_vsize))
+    print('Target Vocab {}'.format(tgt_vsize))
     training_generator=DataGenerator(source_text=src_train,target_text=tgt_train,source_tokenizer=source_tokenizer,target_tokenizer=target_tokenizer,
                                      target_vocab_size=tgt_vsize,source_timesteps=SOURCE_TIMESTEPS,target_timesteps=TARGET_TIMESTEPS,batch_size=BATCH_SIZE,shuffle=True)
     validation_generator=DataGenerator(source_text=src_test,target_text=tgt_test,source_tokenizer=source_tokenizer,target_tokenizer=target_tokenizer,

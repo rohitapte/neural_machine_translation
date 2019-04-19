@@ -23,10 +23,8 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     dense_time=TimeDistributed(dense,name='time_distributed_layer')
     decoder_pred=dense_time(decoder_out)
 
-
     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
-
     full_model.summary(line_length=225)
 
     return full_model
