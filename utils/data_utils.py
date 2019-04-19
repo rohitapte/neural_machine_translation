@@ -12,8 +12,8 @@ def read_data_from_file(filename):
     return text
 
 def sents2sequences(tokenizer, sentences, reverse=False, pad_length=None, padding_type='post'):
-    encoded_text = tokenizer.texts_to_sequences(sentences)
-    preproc_text = pad_sequences(encoded_text, padding=padding_type, maxlen=pad_length)
+    encoded_text=tokenizer.texts_to_sequences(sentences)
+    preproc_text=pad_sequences(encoded_text, padding=padding_type, maxlen=pad_length)
     if reverse:
         preproc_text = np.flip(preproc_text, axis=1)
     return preproc_text
@@ -37,7 +37,7 @@ def get_data():
     print("Length of text {}".format(len(source_lang_text_data)))
     return source_lang_text_data,target_lang_text_data
 
-def tokenize_sentences_and_split(source_timesteps,target_timesteps,test_size=0.1):
+def tokenize_sentences_and_split(source_timesteps,target_timesteps):
     source_lang_text_data,target_lang_text_data=get_data()
     source_tokenizer=keras.preprocessing.text.Tokenizer(oov_token='<UNK>')
     source_tokenizer.fit_on_texts(source_lang_text_data)
@@ -49,3 +49,11 @@ def tokenize_sentences_and_split(source_timesteps,target_timesteps,test_size=0.1
     src_seq_train,src_seq_test,tgt_seq_train,tgt_seq_test=train_test_split(src_seq,tgt_seq,test_size=0.1)
     return src_seq_train,src_seq_test,tgt_seq_train,tgt_seq_test,source_tokenizer,target_tokenizer
 
+def build_tokenizer_and_split_text():
+    source_lang_text_data,target_lang_text_data=get_data()
+    source_tokenizer=keras.preprocessing.text.Tokenizer(oov_token='<UNK>')
+    source_tokenizer.fit_on_texts(source_lang_text_data)
+    target_tokenizer=keras.preprocessing.text.Tokenizer(oov_token='<UNK>')
+    target_tokenizer.fit_on_texts(target_lang_text_data)
+    src_train, src_test, tgt_train, tgt_test = train_test_split(source_lang_text_data, target_lang_text_data, test_size=0.1)
+    return src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer
