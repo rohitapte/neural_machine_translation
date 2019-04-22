@@ -13,7 +13,8 @@ def read_data_from_file(filename):
 
 def sents2sequences(tokenizer, sentences, reverse=False, pad_length=None, padding_type='post'):
     encoded_text=tokenizer.texts_to_sequences(sentences)
-    preproc_text=pad_sequences(encoded_text, padding=padding_type, maxlen=pad_length)
+    #preproc_text=pad_sequences(encoded_text, padding=padding_type, maxlen=pad_length)
+    preproc_text=encoded_text
     if reverse:
         preproc_text = np.flip(preproc_text, axis=1)
     return preproc_text
@@ -30,8 +31,8 @@ def preprocess_data(en_tokenizer, fr_tokenizer, en_text, fr_text, en_timesteps, 
     return en_seq, fr_seq
 
 def get_data():
-    source_lang_text_data=read_data_from_file("data/europarl-v7.fr-en_100.fr")
-    target_lang_text_data=read_data_from_file("data/europarl-v7.fr-en_100.en")
+    source_lang_text_data=read_data_from_file("data/europarl-v7.fr-en_small.fr")
+    target_lang_text_data=read_data_from_file("data/europarl-v7.fr-en_small.en")
     source_lang_text_data=[item.strip() for item in source_lang_text_data]
     target_lang_text_data=['<START> '+item.strip()+' <END>' for item in target_lang_text_data]
     print("Length of text {}".format(len(source_lang_text_data)))
