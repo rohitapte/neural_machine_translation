@@ -6,8 +6,10 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     encoder_inputs=Input(shape=(None,),name='encoder_inputs')
     decoder_inputs=Input(shape=(None,),name='decoder_inputs')
 
-    encoder_embedded=Embedding(source_lang_vocab_size,embedding_dim)(encoder_inputs)
-    decoder_embedded=Embedding(target_lang_vocab_size,embedding_dim)(decoder_inputs)
+    encoder_embedding_layer=Embedding(input_dim=source_lang_vocab_size,output_dim=embedding_dim,mask_zero=True,input_length=source_lang_timesteps)
+    encoder_embedded=encoder_embedding_layer(encoder_inputs)
+    decoder_embedding_layer=Embedding(input_dim=target_lang_vocab_size,output_dim=embedding_dim, mask_zero=True,input_length=target_lang_timesteps)
+    decoder_embedded=decoder_embedding_layer(decoder_inputs)
 
     #encoder LSTM
     encoder_lstm=LSTM(hidden_size,return_sequences=True,return_state=True,name='encoder_lstm')
@@ -27,7 +29,22 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
     full_model.summary(line_length=225)
 
-    return full_model
+    encoder_model=Model(encoder_inputs,encoder_states)
+    encoder_model.summary(line_length=225)
+
+    inf_decoder_state_input_h = Input(shape=(hidden_size,))
+    inf_decoder_state_input_c = Input(shape=(hidden_size,))
+    inf_decoder_states_inputs = [inf_decoder_state_input_h, inf_decoder_state_input_c]
+    inf_decoder_inputs = Input(shape=(None,), name='decoder_inputs')
+    inf_decoder_embedded = decoder_embedding_layer(inf_decoder_inputs)
+
+    inf_decoder_out, inf_decoder_state_h, inf_decoder_state_c = decoder_lstm(inf_decoder_embedded, initial_state=inf_decoder_states_inputs)
+    inf_decoder_states = [inf_decoder_state_h, inf_decoder_state_c]
+    inf_decoder_pred=dense_time(inf_decoder_out)
+    decoder_model=Model(inputs=[inf_decoder_inputs]+inf_decoder_states_inputs,
+                          outputs=[inf_decoder_pred]+inf_decoder_states)
+    decoder_model.summary(line_length=225)
+    return full_model,encoder_model,decoder_model
 
 
 if __name__ == '__main__':
