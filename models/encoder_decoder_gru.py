@@ -1,21 +1,25 @@
 from tensorflow.python.keras.layers import Input,Embedding,GRU,Dense,TimeDistributed
 from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+import numpy as np
 
 def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab_size,target_lang_timesteps,target_lang_vocab_size):
 
     encoder_inputs=Input(shape=(None,),name='encoder_inputs')
     decoder_inputs=Input(shape=(None,),name='decoder_inputs')
 
-    encoder_embedded=Embedding(source_lang_vocab_size,embedding_dim)(encoder_inputs)
-    decoder_embedded=Embedding(target_lang_vocab_size,embedding_dim)(decoder_inputs)
+    encoder_embedding_layer = Embedding(input_dim=source_lang_vocab_size, output_dim=embedding_dim, mask_zero=True,input_length=source_lang_timesteps)
+    encoder_embedded = encoder_embedding_layer(encoder_inputs)
+    decoder_embedding_layer = Embedding(input_dim=target_lang_vocab_size, output_dim=embedding_dim, mask_zero=True,input_length=target_lang_timesteps)
+    decoder_embedded = decoder_embedding_layer(decoder_inputs)
 
     #encoder GRU
-    encoder_lstm=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_lstm')
-    encoder_out,encoder_state=encoder_lstm(encoder_embedded)
+    encoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_gru')
+    encoder_out, encoder_state=encoder_gru(encoder_embedded)
 
     #decoder GRU
-    decoder_lstm=GRU(hidden_size,return_sequences=True,return_state=True,name='decoder_lstm')
-    decoder_out,decoder_state=decoder_lstm(decoder_embedded,initial_state=encoder_state)
+    decoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='decoder_gru')
+    decoder_out,decoder_state=decoder_gru(decoder_embedded,initial_state=encoder_state)
 
     #dense layer
     dense=Dense(target_lang_vocab_size,activation='softmax',name='softmax_layer')
@@ -26,8 +30,41 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
     full_model.summary(line_length=225)
 
-    return full_model
+    encoder_model = Model(encoder_inputs, encoder_state)
+    encoder_model.summary(line_length=225)
 
+    inf_decoder_state = Input(shape=(hidden_size,))
+    inf_decoder_inputs = Input(shape=(None,), name='decoder_inputs')
+    inf_decoder_embedded = decoder_embedding_layer(inf_decoder_inputs)
+
+    inf_decoder_out, inf_decoder_state_out= decoder_gru(inf_decoder_embedded,initial_state=inf_decoder_state)
+    inf_decoder_pred = dense_time(inf_decoder_out)
+    decoder_model = Model(inputs=[inf_decoder_inputs,inf_decoder_state],outputs=[inf_decoder_pred,inf_decoder_state_out])
+    decoder_model.summary(line_length=225)
+
+    return full_model, encoder_model, decoder_model
+
+def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_tokenizer,src_vsize,tgt_vsize,source_timesteps,target_timesteps):
+    target="SENTENCE_START"
+    source_text_encoded = source_tokenizer.texts_to_sequences([sentence])
+    target_text_encoded = target_tokenizer.texts_to_sequences([target])
+    source_preproc_text = pad_sequences(source_text_encoded, padding='post', maxlen=source_timesteps)
+    target_preproc_text=pad_sequences(target_text_encoded,padding='post',maxlen=1)
+    enc_last_state=encoder_model.predict(source_preproc_text)
+    continuePrediction=True
+    output_sentence=''
+    total=0
+    while continuePrediction:
+        decoder_pred,decoder_state=decoder_model.predict([target_preproc_text,enc_last_state])
+        index_value = np.argmax(decoder_pred, axis=-1)[0, 0]
+        sTemp = target_tokenizer.index_word.get(index_value, 'UNK')
+        output_sentence += sTemp + ' '
+        total += 1
+        if total >= target_timesteps or sTemp == 'SENTENCE_END':
+            continuePrediction = False
+        enc_last_state=decoder_state
+        target_preproc_text[0,0]=index_value
+    return output_sentence
 
 if __name__ == '__main__':
     """ Checking nmt model for toy example """
