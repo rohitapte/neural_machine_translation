@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # The GPU id to use, usually either "0" or "1";
     os.environ["CUDA_VISIBLE_DEVICES"] = WHICH_GPU;
 
-    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_50.fr',target_file='data/europarl-v7.fr-en_50.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_small.fr',target_file='data/europarl-v7.fr-en_small.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
     if source_tokenizer.num_words is None:
         src_vsize=max(source_tokenizer.index_word.keys())+1
     else:
@@ -92,6 +92,9 @@ if __name__ == '__main__':
     full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
     save_model(dir_hash,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
 
-    sentence="La Commission devra poursuivre dans cette voie."
-    zz=translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize, tgt_vsize,SOURCE_TIMESTEPS,TARGET_TIMESTEPS)
-    print(zz)
+    sentence="Ce n' est pas demander beaucoup."
+    expected="It is not a lot to ask."
+    translation=translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize, tgt_vsize,SOURCE_TIMESTEPS,TARGET_TIMESTEPS)
+    print("French: "+sentence)
+    print("English: "+expected)
+    print("Translation: "+translation)
