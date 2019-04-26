@@ -5,10 +5,11 @@ from utils.data_utils import build_tokenizer_and_split_text
 from utils.data_generator import DataGenerator
 from tensorflow.python.keras.models import load_model
 
+
 WHICH_MODEL="LSTM"
 saveParams={}
 if WHICH_MODEL=='LSTM':
-    from models.encoder_decoder_lstm import define_nmt
+    from models.encoder_decoder_lstm import define_nmt,translate
 
 def save_model(dir_hash,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer):
     tokenizer_json=source_tokenizer.to_json()
@@ -25,25 +26,34 @@ if __name__ == '__main__':
     #Define model parameters
     WHICH_GPU="1"
 
-    SOURCE_TIMESTEPS,TARGET_TIMESTEPS=100,100
+    SOURCE_TIMESTEPS,TARGET_TIMESTEPS=50,50
     HIDDEN_SIZE=128
-    EMBEDDING_DIM=101
+    EMBEDDING_DIM=100
     NUM_EPOCHS=10
-    BATCH_SIZE=32
+    BATCH_SIZE=64
+    src_min_words=tgt_min_words=20
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID";
     # The GPU id to use, usually either "0" or "1";
     os.environ["CUDA_VISIBLE_DEVICES"] = WHICH_GPU;
 
-    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text()
+    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_50.fr',target_file='data/europarl-v7.fr-en_50.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
     if source_tokenizer.num_words is None:
         src_vsize=max(source_tokenizer.index_word.keys())+1
     else:
-        src_vsize=source_tokenizer.num_words
+        if (max(source_tokenizer.index_word.keys()) + 1) < source_tokenizer.num_words:
+            src_vsize=max(source_tokenizer.index_word.keys())+1
+        else:
+            src_vsize=source_tokenizer.num_words
+        #src_vsize=source_tokenizer.num_words
     if target_tokenizer.num_words is None:
         tgt_vsize=max(target_tokenizer.index_word.keys())+1
     else:
-        tgt_vsize=target_tokenizer.num_words
+        if max(target_tokenizer.index_word.keys())+1<target_tokenizer.num_words:
+            tgt_vsize=max(target_tokenizer.index_word.keys())+1
+        else:
+            tgt_vsize=target_tokenizer.num_words
+        #tgt_vsize=target_tokenizer.num_words
     print('Source Vocab {}'.format(src_vsize))
     print('Target Vocab {}'.format(tgt_vsize))
 
@@ -81,3 +91,7 @@ if __name__ == '__main__':
 
     full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
     save_model(dir_hash,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
+
+    sentence="La Commission devra poursuivre dans cette voie."
+    zz=translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize, tgt_vsize,SOURCE_TIMESTEPS,TARGET_TIMESTEPS)
+    print(zz)

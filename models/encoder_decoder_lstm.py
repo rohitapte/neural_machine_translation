@@ -1,5 +1,7 @@
 from tensorflow.python.keras.layers import Input,Embedding,LSTM,Dense,TimeDistributed
 from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+import numpy as np
 
 def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab_size,target_lang_timesteps,target_lang_vocab_size):
 
@@ -46,6 +48,28 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     decoder_model.summary(line_length=225)
     return full_model,encoder_model,decoder_model
 
+def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_tokenizer,src_vsize,tgt_vsize,source_timesteps,target_timesteps):
+    target="sos"
+    source_text_encoded = source_tokenizer.texts_to_sequences([sentence])
+    target_text_encoded = target_tokenizer.texts_to_sequences([target])
+    source_preproc_text = pad_sequences(source_text_encoded, padding='post', maxlen=source_timesteps)
+    target_preproc_text=pad_sequences(target_text_encoded,padding='post',maxlen=1)
+    enc_last_state_h,enc_last_state_c=encoder_model.predict(source_preproc_text)
+    enc_last_state=[enc_last_state_h,enc_last_state_c]
+    continuePrediction=True
+    output_sentence=''
+    total=0
+    while continuePrediction:
+        decoder_pred,decoder_state_h,decoder_state_c=decoder_model.predict([target_preproc_text]+enc_last_state)
+        index_value = np.argmax(decoder_pred, axis=-1)[0, 0]
+        sTemp = target_tokenizer.index_word.get(index_value, 'UNK')
+        output_sentence += sTemp + ' '
+        total += 1
+        if total >= target_timesteps or sTemp == 'eos':
+            continuePrediction = False
+        enc_last_state=[decoder_state_h,decoder_state_c]
+        target_preproc_text[0,0]=index_value
+    return output_sentence
 
 if __name__ == '__main__':
     """ Checking nmt model for toy example """
