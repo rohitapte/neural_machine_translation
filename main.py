@@ -5,11 +5,12 @@ from utils.data_utils import build_tokenizer_and_split_text
 from utils.data_generator import DataGenerator
 from tensorflow.python.keras.models import load_model
 
-
-WHICH_MODEL="LSTM"
+WHICH_MODEL="GRU"
 saveParams={}
 if WHICH_MODEL=='LSTM':
     from models.encoder_decoder_lstm import define_nmt,translate
+elif WHICH_MODEL=="GRU":
+    from models.encoder_decoder_gru import define_nmt,translate
 
 def save_model(dir_hash,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer):
     tokenizer_json=source_tokenizer.to_json()
