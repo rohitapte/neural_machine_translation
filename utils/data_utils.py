@@ -29,7 +29,7 @@ def get_data(source_file,target_file):
     target_lang_text_data=read_data_from_file(target_file)
     source_lang_text_data=[item.rstrip() for item in source_lang_text_data]
     target_lang_text_data=[item.rstrip() for item in target_lang_text_data]
-    target_lang_text_data=['sos '+sent[:-1]+' eos .' if sent.endswith('.') else 'sos '+sent+' eos .' for sent in target_lang_text_data]
+    target_lang_text_data=['SENTENCE_START '+sent[:-1]+' SENTENCE_END .' if sent.endswith('.') else 'SENTENCE_START '+sent+' SENTENCE_END .' for sent in target_lang_text_data]
     print("Length of text {}".format(len(source_lang_text_data)))
     return source_lang_text_data,target_lang_text_data
 
