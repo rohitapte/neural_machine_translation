@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # The GPU id to use, usually either "0" or "1";
     os.environ["CUDA_VISIBLE_DEVICES"] = WHICH_GPU;
 
-    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_small.fr',target_file='data/europarl-v7.fr-en_small.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_50.fr',target_file='data/europarl-v7.fr-en_50.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
     if source_tokenizer.num_words is None:
         src_vsize=max(source_tokenizer.index_word.keys())+1
     else:
