@@ -3,7 +3,7 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 
-def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab_size,target_lang_timesteps,target_lang_vocab_size):
+def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab_size,target_lang_timesteps,target_lang_vocab_size,dropout):
 
     encoder_inputs=Input(shape=(None,),name='encoder_inputs')
     decoder_inputs=Input(shape=(None,),name='decoder_inputs')
@@ -14,12 +14,12 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     decoder_embedded=decoder_embedding_layer(decoder_inputs)
 
     #encoder LSTM
-    encoder_lstm=LSTM(hidden_size,return_sequences=True,return_state=True,name='encoder_lstm')
+    encoder_lstm=LSTM(hidden_size,return_sequences=True,return_state=True,name='encoder_lstm',dropout=dropout, recurrent_dropout=dropout)
     encoder_out,encoder_state_h,encoder_state_c=encoder_lstm(encoder_embedded)
     encoder_states = [encoder_state_h, encoder_state_c]
 
     #decoder LSTM
-    decoder_lstm=LSTM(hidden_size,return_sequences=True,return_state=True,name='decoder_lstm')
+    decoder_lstm=LSTM(hidden_size,return_sequences=True,return_state=True,name='decoder_lstm',dropout=dropout, recurrent_dropout=dropout)
     decoder_out,decoder_state_h,decoder_state_c=decoder_lstm(decoder_embedded,initial_state=encoder_states)
 
     #dense layer

@@ -27,18 +27,19 @@ if __name__ == '__main__':
     #Define model parameters
     WHICH_GPU="1"
 
-    SOURCE_TIMESTEPS,TARGET_TIMESTEPS=50,50
+    SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
     HIDDEN_SIZE=128
     EMBEDDING_DIM=100
     NUM_EPOCHS=30
     BATCH_SIZE=64
-    src_min_words=tgt_min_words=20
+    DROPOUT=0.5
+    src_min_words=tgt_min_words=10
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID";
     # The GPU id to use, usually either "0" or "1";
     os.environ["CUDA_VISIBLE_DEVICES"] = WHICH_GPU;
 
-    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_50.fr',target_file='data/europarl-v7.fr-en_50.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+    src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_20.fr',target_file='data/europarl-v7.fr-en_20.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
     if source_tokenizer.num_words is None:
         src_vsize=max(source_tokenizer.index_word.keys())+1
     else:
@@ -88,7 +89,7 @@ if __name__ == '__main__':
         print("No existing model found. Creating from scratch.")
         full_model,encoder_model,decoder_model=define_nmt(hidden_size=HIDDEN_SIZE,embedding_dim=EMBEDDING_DIM,
                           source_lang_timesteps=SOURCE_TIMESTEPS,source_lang_vocab_size=src_vsize,
-                          target_lang_timesteps=TARGET_TIMESTEPS,target_lang_vocab_size=tgt_vsize)
+                          target_lang_timesteps=TARGET_TIMESTEPS,target_lang_vocab_size=tgt_vsize,dropout=DROPOUT)
 
     full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
     save_model(dir_hash,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
