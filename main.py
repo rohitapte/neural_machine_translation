@@ -117,7 +117,7 @@ if __name__ == '__main__':
                                          target_vocab_size=tgt_vsize,source_timesteps=SOURCE_TIMESTEPS,target_timesteps=TARGET_TIMESTEPS,batch_size=BATCH_SIZE,shuffle=True)
 
         full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
-        save_model(dir_hash,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
+        save_model(dir_hash,model_dict,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
 
         sentence="Ce n' est pas demander beaucoup."
         expected="It is not a lot to ask."
