@@ -28,10 +28,8 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
 
     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
-    full_model.summary(line_length=225)
 
     encoder_model = Model(encoder_inputs, encoder_state)
-    encoder_model.summary(line_length=225)
 
     inf_decoder_state = Input(shape=(hidden_size,))
     inf_decoder_inputs = Input(shape=(None,), name='decoder_inputs')
@@ -40,7 +38,6 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     inf_decoder_out, inf_decoder_state_out= decoder_gru(inf_decoder_embedded,initial_state=inf_decoder_state)
     inf_decoder_pred = dense_time(inf_decoder_out)
     decoder_model = Model(inputs=[inf_decoder_inputs,inf_decoder_state],outputs=[inf_decoder_pred,inf_decoder_state_out])
-    decoder_model.summary(line_length=225)
 
     return full_model, encoder_model, decoder_model
 

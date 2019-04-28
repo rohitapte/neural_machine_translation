@@ -29,10 +29,8 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
 
     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
-    full_model.summary(line_length=225)
 
     encoder_model=Model(encoder_inputs,encoder_states)
-    encoder_model.summary(line_length=225)
 
     inf_decoder_state_input_h = Input(shape=(hidden_size,))
     inf_decoder_state_input_c = Input(shape=(hidden_size,))
@@ -43,9 +41,7 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     inf_decoder_out, inf_decoder_state_h, inf_decoder_state_c = decoder_lstm(inf_decoder_embedded, initial_state=inf_decoder_states_inputs)
     inf_decoder_states = [inf_decoder_state_h, inf_decoder_state_c]
     inf_decoder_pred=dense_time(inf_decoder_out)
-    decoder_model=Model(inputs=[inf_decoder_inputs]+inf_decoder_states_inputs,
-                          outputs=[inf_decoder_pred]+inf_decoder_states)
-    decoder_model.summary(line_length=225)
+    decoder_model=Model(inputs=[inf_decoder_inputs]+inf_decoder_states_inputs,outputs=[inf_decoder_pred]+inf_decoder_states)
     return full_model,encoder_model,decoder_model
 
 def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_tokenizer,src_vsize,tgt_vsize,source_timesteps,target_timesteps):
