@@ -1,59 +1,26 @@
-import io
-import json
 import os
 from utils.data_utils import build_tokenizer_and_split_text
 from utils.data_generator import DataGenerator
-from tensorflow.python.keras.models import load_model
-from keras_preprocessing.text import tokenizer_from_json
+from utils.model_utils import save_model,load_saved_model
 
-WHICH_MODEL="LSTM"
-saveParams={}
+
+WHICH_MODEL="GRU"
 if WHICH_MODEL=='LSTM':
     from models.encoder_decoder_lstm import define_nmt,translate
 elif WHICH_MODEL=="GRU":
     from models.encoder_decoder_gru import define_nmt,translate
 
-def save_model(dir_hash,model_dict,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer):
-    if not os.path.exists('h5.models/' + dir_hash):
-        os.makedirs('h5.models/' + dir_hash)
-    with open('h5.models/' + dir_hash + "/model_params.json", 'w') as f:
-        f.write(json.dumps(model_dict))
-    tokenizer_json=source_tokenizer.to_json()
-    with io.open('h5.models/'+dir_hash+'/source_tokenizer.json','w',encoding='utf-8') as f:
-        f.write(json.dumps(tokenizer_json,ensure_ascii=False))
-    tokenizer_json=target_tokenizer.to_json()
-    with io.open('h5.models/'+dir_hash+'/target_tokenizer.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(tokenizer_json, ensure_ascii=False))
-    full_model.save('h5.models/'+dir_hash+'/full_model.h5')
-    encoder_model.save('h5.models/'+dir_hash+'/encoder_model.h5')
-    decoder_model.save('h5.models/'+dir_hash+'/decoder_model.h5')
-
-def load_saved_model(dir_hash):
-    with open('h5.models/'+dir_hash+'/model_params.json','r') as f:
-        for line in f:
-            data=json.loads(line)
-    with open('h5.models/'+dir_hash+'/source_tokenizer.json',encoding='utf-8') as f:
-        temp=json.load(f)
-        source_tokenizer=tokenizer_from_json(temp)
-    with open('h5.models/'+dir_hash+'/target_tokenizer.json',encoding='utf-8') as f:
-        temp=json.load(f)
-        target_tokenizer=tokenizer_from_json(temp)
-    full_model=load_model('h5.models/'+dir_hash+'/full_model.h5')
-    encoder_model=load_model('h5.models/'+dir_hash+'/encoder_model.h5')
-    decoder_model=load_model('h5.models/'+dir_hash+'/decoder_model.h5')
-    return data,source_tokenizer,target_tokenizer,full_model,encoder_model,decoder_model
-
 if __name__ == '__main__':
     #Define model parameters
     WHICH_GPU="1"
 
-    MODE="TRAIN"
+    MODE="TRAIN"     #TRAIN,DEMO
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
     HIDDEN_SIZE=128
     EMBEDDING_DIM=100
     NUM_EPOCHS=50
     BATCH_SIZE=64
-    DROPOUT=0.5
+    DROPOUT=1.0
     src_min_words=tgt_min_words=10
     source_file = 'data/europarl-v7.fr-en_small.fr'
     target_file = 'data/europarl-v7.fr-en_small.en'
@@ -67,7 +34,7 @@ if __name__ == '__main__':
     if os.path.exists('h5.models/' + dir_hash):
         print("Loading saved model")
         model_dict, source_tokenizer, target_tokenizer, full_model, encoder_model, decoder_model=load_saved_model(dir_hash)
-        src_train,src_test,tgt_train,tgt_test,_, _=build_tokenizer_and_split_text(source_file=source_file,target_file=target_file,src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+        src_train,src_cv,src_test,tgt_train,tgt_cv,tgt_test,_, _=build_tokenizer_and_split_text(source_file=source_file,target_file=target_file,src_min_words=src_min_words,tgt_min_words=tgt_min_words)
         src_vsize=model_dict['SourceVocab']
         tgt_vsize=model_dict['TargetVocab']
         SOURCE_TIMESTEPS=model_dict['SourceTimeSteps']
@@ -76,7 +43,9 @@ if __name__ == '__main__':
         EMBEDDING_DIM=model_dict['EmbeddingDim']
     else:
         print("Creating new model")
-        src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file=source_file,target_file=target_file,src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+        src_train,src_cv,src_test,tgt_train,tgt_cv,tgt_test,source_tokenizer,target_tokenizer=\
+            build_tokenizer_and_split_text(source_file=source_file,target_file=target_file,src_min_words=src_min_words,
+                                           tgt_min_words=tgt_min_words)
         if source_tokenizer.num_words is None:
             src_vsize = max(source_tokenizer.index_word.keys()) + 1
         else:
@@ -115,7 +84,7 @@ if __name__ == '__main__':
     if MODE=='TRAIN':
         training_generator=DataGenerator(source_text=src_train,target_text=tgt_train,source_tokenizer=source_tokenizer,target_tokenizer=target_tokenizer,
                                          target_vocab_size=tgt_vsize,source_timesteps=SOURCE_TIMESTEPS,target_timesteps=TARGET_TIMESTEPS,batch_size=BATCH_SIZE,shuffle=True)
-        validation_generator=DataGenerator(source_text=src_test,target_text=tgt_test,source_tokenizer=source_tokenizer,target_tokenizer=target_tokenizer,
+        validation_generator=DataGenerator(source_text=src_cv,target_text=tgt_cv,source_tokenizer=source_tokenizer,target_tokenizer=target_tokenizer,
                                          target_vocab_size=tgt_vsize,source_timesteps=SOURCE_TIMESTEPS,target_timesteps=TARGET_TIMESTEPS,batch_size=BATCH_SIZE,shuffle=True)
 
         full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
@@ -127,3 +96,11 @@ if __name__ == '__main__':
         print("French: "+sentence)
         print("English: "+expected)
         print("Translation: "+translation)
+    elif MODE=="DEMO":
+        sentence = "(Le Parlement, debout, observe une minute de silence)"
+        expected = "(The House rose and observed a minute' s silence)"
+        translation = translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize,
+                                tgt_vsize, SOURCE_TIMESTEPS, TARGET_TIMESTEPS)
+        print("French: " + sentence)
+        print("English: " + expected)
+        print("Translation: " + translation)
