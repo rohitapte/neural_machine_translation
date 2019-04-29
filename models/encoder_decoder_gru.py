@@ -5,8 +5,8 @@ import numpy as np
 
 def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab_size,target_lang_timesteps,target_lang_vocab_size,dropout):
 
-    encoder_inputs=Input(shape=(None,),name='encoder_inputs')
-    decoder_inputs=Input(shape=(None,),name='decoder_inputs')
+    encoder_inputs=Input(shape=(source_lang_timesteps,),name='encoder_inputs')
+    decoder_inputs=Input(shape=(target_lang_timesteps-1,),name='decoder_inputs')
 
     encoder_embedding_layer = Embedding(input_dim=source_lang_vocab_size, output_dim=embedding_dim, mask_zero=True,input_length=source_lang_timesteps)
     encoder_embedded = encoder_embedding_layer(encoder_inputs)
@@ -14,11 +14,13 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     decoder_embedded = decoder_embedding_layer(decoder_inputs)
 
     #encoder GRU
-    encoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_gru',dropout=dropout, recurrent_dropout=dropout)
+    #encoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_gru',dropout=dropout, recurrent_dropout=dropout)
+    encoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru')
     encoder_out, encoder_state=encoder_gru(encoder_embedded)
 
     #decoder GRU
-    decoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='decoder_gru',dropout=dropout, recurrent_dropout=dropout)
+    #decoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='decoder_gru',dropout=dropout, recurrent_dropout=dropout)
+    decoder_gru = GRU(hidden_size, return_sequences=True, return_state=True, name='decoder_gru')
     decoder_out,decoder_state=decoder_gru(decoder_embedded,initial_state=encoder_state)
 
     #dense layer
@@ -32,11 +34,11 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     encoder_model = Model(encoder_inputs, [encoder_out, encoder_state])
 
     inf_decoder_state = Input(shape=(hidden_size,))
-    inf_decoder_inputs = Input(shape=(None,), name='decoder_inputs')
+    inf_decoder_inputs = Input(shape=(1,), name='decoder_inputs')
     inf_decoder_embedded = decoder_embedding_layer(inf_decoder_inputs)
 
     inf_decoder_out, inf_decoder_state_out= decoder_gru(inf_decoder_embedded,initial_state=inf_decoder_state)
-    inf_decoder_pred = dense_time(inf_decoder_out)
+    inf_decoder_pred = TimeDistributed(dense)(inf_decoder_out)
     decoder_model = Model(inputs=[inf_decoder_inputs,inf_decoder_state],outputs=[inf_decoder_pred,inf_decoder_state_out])
 
     return full_model, encoder_model, decoder_model
@@ -65,4 +67,7 @@ def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_token
 
 if __name__ == '__main__':
     """ Checking nmt model for toy example """
-    define_nmt(hidden_size=64,embedding_dim=300, source_lang_timesteps=100,source_lang_vocab_size=254,target_lang_timesteps=100,target_lang_vocab_size=321)
+    full_model, encoder_model, decoder_model=define_nmt(hidden_size=64,embedding_dim=300, source_lang_timesteps=100,source_lang_vocab_size=254,target_lang_timesteps=100,target_lang_vocab_size=321,dropout=0.1)
+    full_model.summary(line_length=225)
+    encoder_model.summary(line_length=225)
+    decoder_model.summary(line_length=225)
