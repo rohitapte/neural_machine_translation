@@ -6,7 +6,7 @@ from utils.data_generator import DataGenerator
 from tensorflow.python.keras.models import load_model
 from keras_preprocessing.text import tokenizer_from_json
 
-WHICH_MODEL="GRU"
+WHICH_MODEL="LSTM"
 saveParams={}
 if WHICH_MODEL=='LSTM':
     from models.encoder_decoder_lstm import define_nmt,translate
