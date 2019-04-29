@@ -51,10 +51,12 @@ if __name__ == '__main__':
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
     HIDDEN_SIZE=128
     EMBEDDING_DIM=100
-    NUM_EPOCHS=2
+    NUM_EPOCHS=10
     BATCH_SIZE=64
     DROPOUT=0.5
     src_min_words=tgt_min_words=10
+    source_file = 'data/europarl-v7.fr-en_small.fr'
+    target_file = 'data/europarl-v7.fr-en_small.en'
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID";
     # The GPU id to use, usually either "0" or "1";
@@ -65,7 +67,7 @@ if __name__ == '__main__':
     if os.path.exists('h5.models/' + dir_hash):
         print("Loading saved model")
         model_dict, source_tokenizer, target_tokenizer, full_model, encoder_model, decoder_model=load_saved_model(dir_hash)
-        src_train,src_test,tgt_train,tgt_test,_, _=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_20.fr',target_file='data/europarl-v7.fr-en_20.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+        src_train,src_test,tgt_train,tgt_test,_, _=build_tokenizer_and_split_text(source_file=source_file,target_file=target_file,src_min_words=src_min_words,tgt_min_words=tgt_min_words)
         src_vsize=model_dict['SourceVocab']
         tgt_vsize=model_dict['TargetVocab']
         SOURCE_TIMESTEPS=model_dict['SourceTimeSteps']
@@ -74,7 +76,7 @@ if __name__ == '__main__':
         EMBEDDING_DIM=model_dict['EmbeddingDim']
     else:
         print("Creating new model")
-        src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file='data/europarl-v7.fr-en_20.fr',target_file='data/europarl-v7.fr-en_20.en',src_min_words=src_min_words,tgt_min_words=tgt_min_words)
+        src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer=build_tokenizer_and_split_text(source_file=source_file,target_file=target_file,src_min_words=src_min_words,tgt_min_words=tgt_min_words)
         if source_tokenizer.num_words is None:
             src_vsize = max(source_tokenizer.index_word.keys()) + 1
         else:
@@ -119,8 +121,8 @@ if __name__ == '__main__':
         full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
         save_model(dir_hash,model_dict,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
 
-        sentence="Ce n' est pas demander beaucoup."
-        expected="It is not a lot to ask."
+        sentence="Aux dires de son Président, la Commission serait en mesure de le faire."
+        expected="According to its President, it is in a position to do so."
         translation=translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize, tgt_vsize,SOURCE_TIMESTEPS,TARGET_TIMESTEPS)
         print("French: "+sentence)
         print("English: "+expected)
