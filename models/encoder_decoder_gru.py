@@ -29,7 +29,7 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
 
-    encoder_model = Model(encoder_inputs, encoder_state)
+    encoder_model = Model(encoder_inputs, [encoder_out, encoder_state])
 
     inf_decoder_state = Input(shape=(hidden_size,))
     inf_decoder_inputs = Input(shape=(None,), name='decoder_inputs')
@@ -47,7 +47,7 @@ def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_token
     target_text_encoded = target_tokenizer.texts_to_sequences([target])
     source_preproc_text = pad_sequences(source_text_encoded, padding='post', maxlen=source_timesteps)
     target_preproc_text=pad_sequences(target_text_encoded,padding='post',maxlen=1)
-    enc_last_state=encoder_model.predict(source_preproc_text)
+    encoder_out,enc_last_state=encoder_model.predict(source_preproc_text)
     continuePrediction=True
     output_sentence=''
     total=0
