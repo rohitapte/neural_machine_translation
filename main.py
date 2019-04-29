@@ -121,8 +121,8 @@ if __name__ == '__main__':
         full_model.fit_generator(generator=training_generator,validation_data=validation_generator,use_multiprocessing=True,workers=6,epochs=NUM_EPOCHS)
         save_model(dir_hash,model_dict,full_model,encoder_model,decoder_model,source_tokenizer,target_tokenizer)
 
-        sentence="Aux dires de son Président, la Commission serait en mesure de le faire."
-        expected="According to its President, it is in a position to do so."
+        sentence="(Le Parlement, debout, observe une minute de silence)"
+        expected="(The House rose and observed a minute' s silence)"
         translation=translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize, tgt_vsize,SOURCE_TIMESTEPS,TARGET_TIMESTEPS)
         print("French: "+sentence)
         print("English: "+expected)
