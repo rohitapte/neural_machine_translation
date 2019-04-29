@@ -66,7 +66,8 @@ def build_tokenizer_and_split_text(source_file="data/europarl-v7.fr-en_small.fr"
     target_tokenizer=keras.preprocessing.text.Tokenizer(num_words=target_vocab_count+1,oov_token='UNK')
     target_tokenizer.fit_on_texts(target_lang_text_data)
     src_train, src_test, tgt_train, tgt_test = train_test_split(source_lang_text_data, target_lang_text_data, test_size=0.1)
-    return src_train,src_test,tgt_train,tgt_test,source_tokenizer,target_tokenizer
+    src_train, src_cv, tgt_train, tgt_cv = train_test_split(src_train, tgt_train,test_size=0.1)
+    return src_train,src_cv,src_test,tgt_train,tgt_cv,tgt_test,source_tokenizer,target_tokenizer
 
 if __name__ == '__main__':
     src_train, src_test, tgt_train, tgt_test, source_tokenizer, target_tokenizer = build_tokenizer_and_split_text(source_file="../data/europarl-v7.fr-en_small.fr",target_file="../data/europarl-v7.fr-en_small.en")
