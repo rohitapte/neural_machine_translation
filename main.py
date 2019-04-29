@@ -51,7 +51,7 @@ if __name__ == '__main__':
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
     HIDDEN_SIZE=128
     EMBEDDING_DIM=100
-    NUM_EPOCHS=10
+    NUM_EPOCHS=50
     BATCH_SIZE=64
     DROPOUT=0.5
     src_min_words=tgt_min_words=10
