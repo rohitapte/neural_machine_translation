@@ -28,10 +28,8 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
 
     full_model = Model(inputs=[encoder_inputs, decoder_inputs], outputs=decoder_pred)
     full_model.compile(optimizer='adam', loss='categorical_crossentropy')
-    full_model.summary(line_length=225)
 
     encoder_model = Model(encoder_inputs, encoder_state)
-    encoder_model.summary(line_length=225)
 
     inf_decoder_state = Input(shape=(hidden_size,))
     inf_decoder_inputs = Input(shape=(None,), name='decoder_inputs')
@@ -40,12 +38,11 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     inf_decoder_out, inf_decoder_state_out= decoder_gru(inf_decoder_embedded,initial_state=inf_decoder_state)
     inf_decoder_pred = dense_time(inf_decoder_out)
     decoder_model = Model(inputs=[inf_decoder_inputs,inf_decoder_state],outputs=[inf_decoder_pred,inf_decoder_state_out])
-    decoder_model.summary(line_length=225)
 
     return full_model, encoder_model, decoder_model
 
 def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_tokenizer,src_vsize,tgt_vsize,source_timesteps,target_timesteps):
-    target="SENTENCESTART"
+    target="sentencestart"
     source_text_encoded = source_tokenizer.texts_to_sequences([sentence])
     target_text_encoded = target_tokenizer.texts_to_sequences([target])
     source_preproc_text = pad_sequences(source_text_encoded, padding='post', maxlen=source_timesteps)
@@ -60,7 +57,7 @@ def translate(sentence,encoder_model,decoder_model,source_tokenizer,target_token
         sTemp = target_tokenizer.index_word.get(index_value, 'UNK')
         output_sentence += sTemp + ' '
         total += 1
-        if total >= target_timesteps or sTemp == 'SENTENCEEND':
+        if total >= target_timesteps or sTemp == 'sentenceend':
             continuePrediction = False
         enc_last_state=decoder_state
         target_preproc_text[0,0]=index_value
