@@ -4,11 +4,13 @@ from utils.data_generator import DataGenerator
 from utils.model_utils import save_model,load_saved_model
 from nltk.translate.bleu_score import sentence_bleu
 
-WHICH_MODEL="GRU"
+WHICH_MODEL="GRU_Attention"
 if WHICH_MODEL=='LSTM':
     from models.encoder_decoder_lstm import define_nmt,translate
 elif WHICH_MODEL=="GRU":
     from models.encoder_decoder_gru import define_nmt,translate
+elif WHICH_MODEL=="GRU_Attention":
+    from models.encoder_decoder_gru_attention import define_nmt, translate
 
 if __name__ == '__main__':
     #Define model parameters
@@ -18,7 +20,7 @@ if __name__ == '__main__':
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
     HIDDEN_SIZE=128
     EMBEDDING_DIM=100
-    NUM_EPOCHS=50
+    NUM_EPOCHS=100
     BATCH_SIZE=64
     DROPOUT=1.0
     src_min_words=tgt_min_words=10
