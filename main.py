@@ -2,7 +2,7 @@ import os
 from utils.data_utils import build_tokenizer_and_split_text
 from utils.data_generator import DataGenerator
 from utils.model_utils import save_model,load_saved_model
-
+from nltk.translate.bleu_score import sentence_bleu
 
 WHICH_MODEL="GRU"
 if WHICH_MODEL=='LSTM':
@@ -96,6 +96,19 @@ if __name__ == '__main__':
         print("French: "+sentence)
         print("English: "+expected)
         print("Translation: "+translation)
+
+        #calculate blue score on test set
+        total_blue=0.0
+        for i,sentence in enumerate(src_test):
+            translation=translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize,tgt_vsize, SOURCE_TIMESTEPS, TARGET_TIMESTEPS)
+            expected=[tgt_test[i].lower().replace("sentencestart ","")]
+            translation=translation.replace(" sentenceend","")
+            blue_score=sentence_bleu(expected,translation)
+            total_blue+=blue_score
+        total_blue/=len(src_test)
+        print("Average blue score for "+str(len(src_test))+" items: "+str(total_blue))
+
+
     elif MODE=="DEMO":
         sentence = "(Le Parlement, debout, observe une minute de silence)"
         expected = "(The House rose and observed a minute' s silence)"
