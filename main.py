@@ -16,7 +16,7 @@ if __name__ == '__main__':
     #Define model parameters
     WHICH_GPU="1"
 
-    MODE="TRAIN"     #TRAIN,DEMO
+    MODE="DEMO"     #TRAIN,DEMO
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
     HIDDEN_SIZE=256
     EMBEDDING_DIM=100
@@ -112,10 +112,8 @@ if __name__ == '__main__':
 
 
     elif MODE=="DEMO":
-        sentence = "(Le Parlement, debout, observe une minute de silence)"
-        expected = "(The House rose and observed a minute' s silence)"
+        sentence = input("Please enter a french sentence: ")
         translation = translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize,
                                 tgt_vsize, SOURCE_TIMESTEPS, TARGET_TIMESTEPS)
         print("French: " + sentence)
-        print("English: " + expected)
         print("Translation: " + translation)
