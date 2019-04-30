@@ -18,14 +18,14 @@ if __name__ == '__main__':
 
     MODE="TRAIN"     #TRAIN,DEMO
     SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
-    HIDDEN_SIZE=128
+    HIDDEN_SIZE=256
     EMBEDDING_DIM=100
-    NUM_EPOCHS=100
+    NUM_EPOCHS=10
     BATCH_SIZE=64
     DROPOUT=1.0
     src_min_words=tgt_min_words=10
-    source_file = 'data/europarl-v7.fr-en_small.fr'
-    target_file = 'data/europarl-v7.fr-en_small.en'
+    source_file = 'data/europarl-v7.fr-en_20.fr'
+    target_file = 'data/europarl-v7.fr-en_20.en'
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID";
     # The GPU id to use, usually either "0" or "1";
