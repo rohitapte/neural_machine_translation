@@ -17,7 +17,7 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     #encoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_gru',dropout=dropout, recurrent_dropout=dropout)
     encoder_gru = Bidirectional(GRU(hidden_size, return_sequences=True, return_state=True, name='encoder_gru'))
     encoder_out, encoder_state_f,encoder_state_b=encoder_gru(encoder_embedded)
-    encoder_state=Concatenate()[encoder_state_f,encoder_state_b]
+    encoder_state=Concatenate()([encoder_state_f,encoder_state_b])
 
     #decoder GRU
     #decoder_gru=GRU(hidden_size,return_sequences=True,return_state=True,name='decoder_gru',dropout=dropout, recurrent_dropout=dropout)
