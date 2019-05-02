@@ -18,7 +18,7 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     encoder_gru1=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_gru1')
     encoder_out1,encoder_state1=encoder_gru1(encoder_embedded)
     encoder_gru2=GRU(hidden_size,return_sequences=True,return_state=True,name='encoder_gru2')
-    encoder_out2,encoder_state2=encoder_gru1(encoder_out1)
+    encoder_out2,encoder_state2=encoder_gru2(encoder_out1)
     encoder_states=[encoder_state1,encoder_state2]
 
     #decoder GRU
@@ -44,7 +44,7 @@ def define_nmt(hidden_size,embedding_dim,source_lang_timesteps,source_lang_vocab
     inf_decoder_embedded = decoder_embedding_layer(inf_decoder_inputs)
 
     inf_decoder_out1, inf_decoder_state_out1= decoder_gru1(inf_decoder_embedded,initial_state=inf_decoder_state1)
-    inf_decoder_out2, inf_decoder_state_out2 = decoder_gru1(inf_decoder_out1, initial_state=inf_decoder_state2)
+    inf_decoder_out2, inf_decoder_state_out2 = decoder_gru2(inf_decoder_out1, initial_state=inf_decoder_state2)
     inf_decoder_pred = TimeDistributed(dense)(inf_decoder_out2)
     decoder_model = Model(inputs=[inf_decoder_inputs,inf_decoder_state1,inf_decoder_state2],outputs=[inf_decoder_pred,inf_decoder_state_out1,inf_decoder_state_out2])
 
