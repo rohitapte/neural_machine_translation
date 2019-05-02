@@ -22,10 +22,14 @@ if WHICH_MODEL=='LSTM':
     from models.encoder_decoder_lstm import define_nmt,translate
 elif WHICH_MODEL=="GRU":
     from models.encoder_decoder_gru import define_nmt,translate
+elif WHICH_MODEL=="GRU_Bidirectional":
+    from models.encoder_decoder_bidirectional_gru import define_nmt,translate
 elif WHICH_MODEL=="GRU_Attention":
     from models.encoder_decoder_gru_attention import define_nmt, translate
 elif WHICH_MODEL=="GRU_Stacked":
     from models.encoder_decoder_stacked_gru import define_nmt, translate
+elif WHICH_MODEL=="GRU_StackedBidirectional":
+    from models.encoder_decoder_stacked_bidirectional_gru import define_nmt,translate
 
 if __name__ == '__main__':
     #Define model parameters
