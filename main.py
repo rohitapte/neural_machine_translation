@@ -12,11 +12,11 @@ EMBEDDING_DIM=100
 NUM_EPOCHS=10
 BATCH_SIZE=64
 DROPOUT=1.0
-src_min_words=tgt_min_words=10
+src_min_words=tgt_min_words=1
 source_file = 'data/europarl-v7.fr-en_20.fr'
 target_file = 'data/europarl-v7.fr-en_20.en'
 
-WHICH_MODEL="GRU_Stacked"
+WHICH_MODEL="GRU_Attention"
 
 if WHICH_MODEL=='LSTM':
     from models.encoder_decoder_lstm import define_nmt,translate
