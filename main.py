@@ -4,17 +4,17 @@ from utils.data_generator import DataGenerator
 from utils.model_utils import save_model,load_saved_model
 from nltk.translate.bleu_score import sentence_bleu
 
-MODE="TRAIN"     #TRAIN,DEMO
-#dir_hash='GRU_Attention_256_100_20_20'     #populate for saved model in demo mode
+MODE="DEMO"     #TRAIN,DEMO
+dir_hash='GRU_Attention_256_100_20_20'     #populate for saved model in demo mode
 SOURCE_TIMESTEPS,TARGET_TIMESTEPS=20,20
-HIDDEN_SIZE=512
+HIDDEN_SIZE=256
 EMBEDDING_DIM=100
-NUM_EPOCHS=10
+NUM_EPOCHS=5
 BATCH_SIZE=64
 DROPOUT=1.0
 src_min_words=tgt_min_words=1
-source_file = 'data/europarl-v7.fr-en_20.fr'
-target_file = 'data/europarl-v7.fr-en_20.en'
+source_file = 'data/europarl-v7.es-en_20.en'
+target_file = 'data/europarl-v7.es-en_20.es'
 
 WHICH_MODEL="GRU_Attention"
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     elif MODE=="DEMO":
         print("Loading saved model")
-        model_dict, source_tokenizer, target_tokenizer, full_model, encoder_model, decoder_model = load_saved_model(dir_hash)
+        model_dict, source_tokenizer, target_tokenizer, _, encoder_model, decoder_model = load_saved_model(dir_hash)
         #src_train, src_cv, src_test, tgt_train, tgt_cv, tgt_test, _, _ = build_tokenizer_and_split_text(
         #    source_file=source_file, target_file=target_file, src_min_words=src_min_words, tgt_min_words=tgt_min_words)
         src_vsize = model_dict['SourceVocab']
@@ -121,8 +121,8 @@ if __name__ == '__main__':
         HIDDEN_SIZE = model_dict['HiddenSize']
         EMBEDDING_DIM = model_dict['EmbeddingDim']
         while True:
-            sentence = input("Please enter a french sentence: ")
+            sentence = input("Please enter an english sentence: ")
             translation = translate(sentence, encoder_model, decoder_model, source_tokenizer, target_tokenizer, src_vsize,
                                     tgt_vsize, SOURCE_TIMESTEPS, TARGET_TIMESTEPS)
-            print("French: " + sentence)
+            print("English: " + sentence)
             print("Translation: " + translation.replace(" sentenceend",""))
